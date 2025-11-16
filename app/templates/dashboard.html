@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Chart.js CDN (no install needed) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; }
+    h1 { margin-bottom: 8px; }
+    .muted { color: #6b7280; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; text-align: center; }
+    .big { font-size: 1.6rem; font-weight: 700; }
+    a { color: #2563eb; }
+  </style>
+</head>
+<body>
+  <h1>Dashboard</h1>
+  <p class="muted">Summary of your recent scans.</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="muted">Total</div>
+      <div class="big">{{ stats.total }}</div>
+    </div>
+    <div class="card">
+      <div class="muted">Phishing</div>
+      <div class="big">{{ stats.phishing }}</div>
+    </div>
+    <div class="card">
+      <div class="muted">Legitimate</div>
+      <div class="big">{{ stats.legit }}</div>
+    </div>
+  </div>
+
+  <canvas id="pie" width="320" height="320"></canvas>
+
+  <script>
+    // handle empty datasets gracefully
+    const phish = {{ stats.phishing or 0 }};
+    const legit = {{ stats.legit or 0 }};
+    const ctx = document.getElementById('pie');
+
+    new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: ['Phishing', 'Legitimate'],
+        datasets: [{
+          data: [phish, legit]
+        }]
+      },
+      options: {
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+  </script>
+
+  <p style="margin-top:16px;">
+    <a href="/">← Home</a> ·
+    <a href="/history">History</a>
+  </p>
+</body>
+</html>

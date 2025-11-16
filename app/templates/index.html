@@ -1,0 +1,73 @@
+<!-- app/templates/index.html -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Phishing URL Detector</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      :root { --radius: 12px; }
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; }
+      h1 { margin-bottom: 16px; }
+      .card { border: 1px solid #e5e7eb; border-radius: var(--radius); padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+      .row { display: flex; gap: 8px; }
+      input[type="text"] { flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; }
+      button { padding: 10px 14px; border: 0; border-radius: 8px; cursor: pointer; }
+      .primary { background: #111827; color: white; }
+      .result { margin-top: 16px; font-size: 1.1rem; }
+      .risk { color: #b91c1c; font-weight: 600; }
+      .safe { color: #065f46; font-weight: 600; }
+      .bar { height: 12px; background: #e5e7eb; border-radius: 6px; overflow: hidden; margin-top: 8px; }
+      .fill { height: 100%; width: 0; transition: width .6s; }
+      .fill.risk { background: #ef4444; }
+      .fill.safe { background: #10b981; }
+      .muted { color: #6b7280; font-size: .9rem; margin-top: 8px; }
+    </style>
+  </head>
+  <body>
+    <h1>Phishing URL Detector</h1>
+    <p class="muted" style="margin-top:-8px;">
+  <a href="/history">History</a> · <a href="/dashboard">Dashboard</a>
+</p>
+
+    <form class="card" method="POST" autocomplete="off">
+      <label for="url">Enter a URL to check</label>
+      <div class="row" style="margin-top:8px;">
+        <input id="url" name="url" type="text" placeholder="https://example.com/login" value="{{ url or '' }}" required>
+        <button class="primary" type="submit">Check</button>
+      </div>
+      <div class="muted">We never visit the URL. We only analyze the text (lexical features).</div>
+    </form>
+
+    {% if result %}
+      <div class="card" style="margin-top:16px;">
+        <div class="result">
+          Result:
+          <span class="{{ 'risk' if result=='Phishing' else 'safe' }}">{{ result }}</span>
+        </div>
+        {% if confidence is not none %}
+          <div class="muted">Confidence: {{ (confidence*100)|round(1) }}%</div>
+          <div class="bar">
+            <div id="fill" class="fill {{ 'risk' if result=='Phishing' else 'safe' }}"></div>
+          </div>
+          {% if reasons and reasons|length > 0 %}
+  <div class="card" style="margin-top:12px;">
+    <div class="muted">Why this result?</div>
+    <ul>
+      {% for r in reasons %}
+        <li>{{ r }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+        {% endif %}
+      </div>
+      <script>
+        // Animate the confidence bar
+        const c = {{ (confidence or 0) }};
+        const fill = document.getElementById('fill');
+        if (fill) fill.style.width = (c*100) + '%';
+      </script>
+    {% endif %}
+  </body>
+</html>

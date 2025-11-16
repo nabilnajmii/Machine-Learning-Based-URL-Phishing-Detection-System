@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Scan History</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;max-width:920px;margin:40px auto;padding:0 16px;}
+    table{width:100%;border-collapse:collapse;margin-top:16px}
+    th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top}
+    .pill{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:600}
+    .risk{background:#fee2e2;color:#991b1b}
+    .safe{background:#dcfce7;color:#065f46}
+    .muted{color:#6b7280}
+    a{color:#2563eb}
+  </style>
+</head>
+<body>
+  <h1>Scan History</h1>
+  <div class="muted">Last 100 checks (UTC).</div>
+  <p><a href="/">← Back</a></p>
+  <table>
+    <thead><tr><th>Time (UTC)</th><th>URL</th><th>Result</th><th>Confidence</th></tr></thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td class="muted">{{ r.ts }}</td>
+        <td><a href="{{ r.url }}" target="_blank" rel="noopener">{{ r.url }}</a></td>
+        <td>
+          <span class="pill {{ 'risk' if r.result=='Phishing' else 'safe' }}">{{ r.result }}</span>
+        </td>
+        <td>{{ (r.confidence)|round(3) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>
