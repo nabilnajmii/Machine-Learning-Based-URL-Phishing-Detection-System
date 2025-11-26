@@ -20,3 +20,5 @@ entropy_host
 subdomain_len
 domain_len
 suffix_len
+num_suspicious_chars
+brand_mismatch

@@ -2,6 +2,15 @@
 # ------------------------------------------------------------
 # Enhanced lexical feature extractor for phishing URL detection
 # (No web requests; safe + fast)
+#This module takes a raw URL string and converts it into a set of numeric lexical features such as length,
+# number of digits, entropy, presence of HTTPS, suspicious characters, brand mismatch, etc.
+#These features are used as input to the machine learning model to classify phishing vs legitimate URLs.”
+# ------------------------------------------------------------
+
+# src/features.py
+# ------------------------------------------------------------
+# Enhanced lexical feature extractor for phishing URL detection
+# (No web requests; safe + fast)
 # ------------------------------------------------------------
 
 import re
@@ -73,6 +82,28 @@ def extract_features(url: str) -> dict:
     entropy_path = shannon_entropy(path_plus_query[:1024])
     entropy_host = shannon_entropy(host)
 
+    # --- New feature 1: number of suspicious characters in URL ---
+    suspicious_chars = "@%$?&=/#"
+    num_suspicious_chars = sum(url.count(ch) for ch in suspicious_chars)
+
+    # --- New feature 2: brand/domain mismatch ---
+    # If the URL contains known brand keywords, but the registered domain
+    # does NOT contain that brand, flag as a mismatch.
+    url_lower = url.lower()
+    domain_part = (ext.domain or "").lower()
+
+    known_brands = [
+        "paypal", "google", "facebook", "apple", "microsoft",
+        "bank", "maybank", "cimb", "spotify", "instagram", "twitter",
+    ]
+
+    brands_in_url = [b for b in known_brands if b in url_lower]
+    brands_in_domain = [b for b in known_brands if b in domain_part]
+    if brands_in_url and not brands_in_domain:
+        brand_mismatch = 1
+    else:
+        brand_mismatch = 0
+
     feats = {
         "url_length": len(url),
         "host_length": len(host),
@@ -100,19 +131,40 @@ def extract_features(url: str) -> dict:
         "subdomain_len": len(ext.subdomain),
         "domain_len": len(ext.domain),
         "suffix_len": len(ext.suffix),
+
+        # New features:
+        "num_suspicious_chars": num_suspicious_chars,
+        "brand_mismatch": brand_mismatch,
     }
     return feats
 
 def feature_order():
     return [
-        "url_length","host_length","path_length",
-        "num_dots_host","num_subdomains","num_params",
-        "num_digits_url","num_specials_url",
-        "has_https","has_at","has_hyphen_host","is_ip_host",
-        "is_shortener","has_suspicious_tld","keyword_hits",
-        "entropy_url","entropy_path","entropy_host",
-        "subdomain_len","domain_len","suffix_len"
+        "url_length",
+        "host_length",
+        "path_length",
+        "num_dots_host",
+        "num_subdomains",
+        "num_params",
+        "num_digits_url",
+        "num_specials_url",
+        "has_https",
+        "has_at",
+        "has_hyphen_host",
+        "is_ip_host",
+        "is_shortener",
+        "has_suspicious_tld",
+        "keyword_hits",
+        "entropy_url",
+        "entropy_path",
+        "entropy_host",
+        "subdomain_len",
+        "domain_len",
+        "suffix_len",
+        "num_suspicious_chars",
+        "brand_mismatch",
     ]
 
 def to_vector(features: dict):
     return [features[k] for k in feature_order()]
+

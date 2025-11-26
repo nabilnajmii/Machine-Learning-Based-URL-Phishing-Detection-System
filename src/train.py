@@ -76,7 +76,10 @@ def main():
 
     # small dataset => bigger test split to see variability
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.4, stratify=y, random_state=42
+        X, y, 
+        test_size=0.2, #20% testing, 80% training
+        stratify=y, #ensure balance of phishing and legit urls for both training and testing sets
+        random_state=42 
     )
 
     print(f"\n[Info] Dataset split:")
